@@ -27,66 +27,53 @@ use crate::{
 #[wasm_bindgen(start)]
 pub async fn main_js() {
     init_logger();
-    let world = Rc::new(World::default());
+
+    //init dom stuff
     let template_manager = TemplateManager::new(); 
-    let (document, body) = init_dom(&template_manager);
-    let main_input = init_main_input(world.clone(), &document);
 
-    init_world(
-        world.clone(), 
-        template_manager, 
-        document, 
-        body,
-        main_input
-    );
-
-    world.run_workload(systems::RENDER_VISIBLE);
-
-    //We need to keep the world in memory for the duration of the app
-    //In other scenarios, like a game loop, this wouldn't be necessary
-    std::mem::forget(Box::new(world));
-    log::info!("let's rock and roll!");
-}
-
-fn init_dom(tm:&TemplateManager) -> (Document, Element) {
     let document = window().unwrap_throw().document().unwrap_throw();
     let body:Element = document.body().unwrap_throw().into();
 
-    body.append_child(&tm.body()).unwrap_throw();
-    body.append_child(&tm.footer()).unwrap_throw();
+    body.append_child(&template_manager.body()).unwrap_throw();
+    body.append_child(&template_manager.footer()).unwrap_throw();
 
-    (document, body) 
-}
+    //init world
+    let world = Rc::new(World::default());
 
-fn init_main_input(world:Rc<World>, doc:&Document) -> MainInput {
-    let elem:HtmlInputElement = dom::get_element_by_id(&doc, "main-input").unwrap_throw();
-    let on_keypress = EventListener::new(&elem, "keypress", {
-        let elem = elem.clone();
-        move |event| {
-            events::main_input_keypress(world.clone(), &elem, event.dyn_ref().unwrap_throw())
-        }
-    });
-    MainInput {
-        elem,
-        on_keypress 
-    }
-}
-
-fn init_world(world:Rc<World>, tm:TemplateManager, document:Document, body:Element, main_input:MainInput) {
-    world.add_unique_non_send_sync(tm);
-    //world.add_unique_non_send_sync(web_sys::window().unwrap_throw().document().unwrap_throw());
-    world.add_unique(Order(VecDeque::new()));
-    world.add_unique(StatusFilter {status: None} );
-    world.add_unique(StatusFilter {status: None} );
-    world.add_unique_non_send_sync(main_input);
-
+    world.add_unique_non_send_sync(world.clone());
+    world.add_unique_non_send_sync(template_manager);
+    world.add_unique(Order{ list: VecDeque::new(), pending_render: None});
+    world.add_unique(BottomFilter::new());
     world.add_unique_non_send_sync(document);
     world.add_unique_non_send_sync(DomRoot(body));
 
     world
-        .add_workload(systems::RENDER_VISIBLE)
-        .with_system(system!(systems::toggle_main_visible))
+        .add_workload(systems::RENDER)
+        .with_system(system!(systems::render::main_visible))
+        .with_system(system!(systems::render::toggles))
+        .with_system(system!(systems::render::editing))
+        .with_system(system!(systems::render::labels))
+        .with_system(system!(systems::render::list))
+        .with_system(system!(systems::render::count))
+        .with_system(system!(systems::render::toggle_all))
+        .with_system(system!(systems::render::clear_completed))
+        .with_system(system!(systems::render::filter))
+        .with_system(system!(systems::render::filter_selection))
+        .with_system(system!(systems::render::clear_dirty))
         .build();
+
+    world
+        .add_workload(systems::SETUP)
+        .with_system(system!(systems::setup::main_input))
+        .with_system(system!(systems::setup::toggle_all))
+        .with_system(system!(systems::setup::router))
+        .with_system(system!(systems::setup::load))
+        .with_system(system!(systems::setup::clear_completed))
+        .build();
+
+
+    world.run_workload(systems::SETUP);
+    world.run_workload(systems::RENDER);
 
 }
 

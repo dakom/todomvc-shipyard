@@ -2,7 +2,7 @@ use simple_html_template::{TemplateCache, html_map};
 use shipyard::EntityId;
 use wasm_bindgen::prelude::*;
 use web_sys::DocumentFragment;
-use crate::dom::entity_id;
+use crate::dom::selector::entity_id;
 
 pub const BODY:&'static str = "body";
 pub const FOOTER:&'static str = "footer";

@@ -5,45 +5,95 @@ use wasm_bindgen::JsCast;
 use crate::components::DocumentView;
 use web_sys::{HtmlElement, Element, DocumentFragment, HtmlCollection, Document};
 
-pub fn entity_id(id:shipyard::EntityId) -> String {
-    //gotta start with a letter and avoid special characters
-    format!("e{}-{}", id.index(), id.gen())
+
+pub fn select<T: JsCast>(doc:&Document, query:&str) -> T {
+    try_select(doc, query).unwrap_throw()
 }
 
-pub fn select(doc:&Document, query:&str) -> Option<Element> {
-    doc.query_selector(query).unwrap_throw()
+pub fn try_select<T: JsCast>(doc:&Document, query:&str) -> Option<T> {
+    doc
+        .query_selector(query)
+        .unwrap_throw()
+        .map(|elem| elem.dyn_into().unwrap_throw())
 }
 
+pub fn set_style(elem:&HtmlElement, style:&str, value:&str) {
+    try_set_style(elem, style, value).unwrap_throw();
+}
+
+pub fn toggle_class(elem:&HtmlElement, class:&str, flag:bool) {
+    try_toggle_class(elem, class, flag).unwrap_throw();
+}
+
+pub fn try_toggle_class(elem:&HtmlElement, class:&str, flag:bool) -> Result<(), JsValue> {
+    let class_list = elem.class_list();
+    if flag {
+        class_list.add_1(class)
+    } else {
+        class_list.remove_1(class)
+    }
+}
+pub fn try_set_style(elem:&HtmlElement, style:&str, value:&str) -> Result<(), JsValue> {
+    elem.style()
+        .set_property(style, value)
+}
+pub fn try_set_styles(elem:&HtmlElement, styles:&[(&str, &str)]) {
+    for (style, value) in styles.iter() {
+        let _ = try_set_style(&elem, style, value);
+    }
+}
+pub fn set_styles(elem:&HtmlElement, styles:&[(&str, &str)]) {
+    for (style, value) in styles.iter() {
+        set_style(&elem, style, value);
+    }
+}
 // gets the parent element via parent id
 pub fn append_to_id(doc:&Document, parent_id:&str, fragment:DocumentFragment) {
-    let parent:Element = get_element_by_id(&doc, parent_id).unwrap_throw();
+    let parent:Element = get_element_by_id(&doc, parent_id);
     parent.append_child(&fragment).unwrap_throw();
+}
+pub fn try_append_to_id(doc:&Document, parent_id:&str, fragment:DocumentFragment) {
+    if let Some(parent) = try_get_element_by_id::<Element>(&doc, parent_id) {
+        parent.append_child(&fragment).unwrap_throw();
+    }
 }
 // gets the parent element via parent id
 pub fn prepend_to_id(doc:&Document, parent_id:&str, fragment:DocumentFragment) {
-    let parent:Element = get_element_by_id(&doc, parent_id).unwrap_throw();
+    let parent:Element = get_element_by_id(&doc, parent_id);
     parent.prepend_with_node_1(&fragment).unwrap_throw();
 }
+pub fn try_prepend_to_id(doc:&Document, parent_id:&str, fragment:DocumentFragment) {
+    if let Some(parent) = try_get_element_by_id::<Element>(&doc, parent_id) {
+        parent.prepend_with_node_1(&fragment).unwrap_throw();
+    }
+}
 
-pub fn set_styles_by_id(doc:&Document, id:&str, styles:&[(&str, &str)]) {
-    if let Some(elem) = get_element_by_id::<HtmlElement>(doc, id) {
+pub fn try_set_styles_by_id(doc:&Document, id:&str, styles:&[(&str, &str)]) {
+    if let Some(elem) = try_get_element_by_id::<HtmlElement>(doc, id) {
         for (style, value) in styles.iter() {
-            elem.style()
-                .set_property(style, value)
-                .unwrap_throw();
+            let _ = try_set_style(&elem, style, value);
         }
     }
 }
 
-pub fn set_style_by_id(doc:&Document, id:&str, style:&str, value:&str) {
-    if let Some(elem) = get_element_by_id::<HtmlElement>(doc, id) {
-        elem.style()
-            .set_property(style, value)
-            .unwrap_throw();
+pub fn try_set_style_by_id(doc:&Document, id:&str, style:&str, value:&str) {
+    if let Some(elem) = try_get_element_by_id::<HtmlElement>(doc, id) {
+        let _ = try_set_style(&elem, style, value);
+    }
+}
+pub fn set_styles_by_id(doc:&Document, id:&str, styles:&[(&str, &str)]) {
+    let elem = get_element_by_id::<HtmlElement>(doc, id);
+    for (style, value) in styles.iter() {
+        set_style(&elem, style, value);
     }
 }
 
-pub fn set_styles_by_class(parent:&Element, class_names:&str, styles:&[(&str, &str)]) {
+pub fn set_style_by_id(doc:&Document, id:&str, style:&str, value:&str) {
+    let elem = get_element_by_id::<HtmlElement>(doc, id);
+    set_style(&elem, style, value);
+}
+
+pub fn set_children_with_class_styles(parent:&Element, class_names:&str, styles:&[(&str, &str)]) {
     for elem in get_elements_by_class::<HtmlElement>(parent, class_names) {
         for (style, value) in styles.iter() {
             elem.style()
@@ -53,7 +103,7 @@ pub fn set_styles_by_class(parent:&Element, class_names:&str, styles:&[(&str, &s
     }
 }
 
-pub fn set_style_by_class(parent:&Element, class_names:&str, style:&str, value:&str) {
+pub fn set_children_with_class_style(parent:&Element, class_names:&str, style:&str, value:&str) {
     for elem in get_elements_by_class::<HtmlElement>(parent, class_names) {
         elem.style()
             .set_property(style, value)
@@ -67,7 +117,11 @@ pub fn get_elements_by_class<T: JsCast>(parent:&Element, class_names:&str) -> Ve
     res
 }
 
-pub fn get_element_by_id<T: JsCast>(doc:&Document, id:&str) -> Option<T> {
+pub fn get_element_by_id<T: JsCast>(doc:&Document, id:&str) -> T {
+    try_get_element_by_id(&doc, &id).unwrap_throw()
+}
+
+pub fn try_get_element_by_id<T: JsCast>(doc:&Document, id:&str) -> Option<T> {
     doc.get_element_by_id(id)
         .map(|elem| elem.dyn_into().unwrap_throw())
 }
