@@ -22,8 +22,9 @@ pub fn load(
     tm:TemplateManagerView,
     doc:DocumentView,
 ) {
+    /*
     append_todo(
-        "hello world".to_string(),
+        "loading and saving".to_string(),
         entities,
         order,
         todos,
@@ -32,7 +33,7 @@ pub fn load(
         tm,
         doc,
     );
-
+    */
 }
 pub fn toggle_all(storages:AllStoragesViewMut) {
     let world:WorldView = storages.borrow();
