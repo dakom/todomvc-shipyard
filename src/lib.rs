@@ -9,12 +9,10 @@ mod templates;
 mod systems;
 mod components;
 mod dom;
-mod events;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use std::collections::VecDeque;
 use std::rc::Rc;
 use shipyard::*;
 use gloo_events::EventListener;
@@ -39,42 +37,16 @@ pub async fn main_js() {
 
     //init world
     let world = Rc::new(World::default());
+    world.run_with_data(systems::setup::global_uniques, (
+            template_manager, 
+            document, 
+            body, 
+            world.clone()
+    ));
+    systems::register_workloads(&world);
 
-    world.add_unique_non_send_sync(world.clone());
-    world.add_unique_non_send_sync(template_manager);
-    world.add_unique(Order{ list: VecDeque::new(), pending_render: None});
-    world.add_unique(BottomFilter::new());
-    world.add_unique_non_send_sync(document);
-    world.add_unique_non_send_sync(DomRoot(body));
-
-    world
-        .add_workload(systems::RENDER)
-        .with_system(system!(systems::render::main_visible))
-        .with_system(system!(systems::render::toggles))
-        .with_system(system!(systems::render::editing))
-        .with_system(system!(systems::render::labels))
-        .with_system(system!(systems::render::list))
-        .with_system(system!(systems::render::count))
-        .with_system(system!(systems::render::toggle_all))
-        .with_system(system!(systems::render::clear_completed))
-        .with_system(system!(systems::render::filter))
-        .with_system(system!(systems::render::filter_selection))
-        .with_system(system!(systems::render::clear_dirty))
-        .build();
-
-    world
-        .add_workload(systems::SETUP)
-        .with_system(system!(systems::setup::main_input))
-        .with_system(system!(systems::setup::toggle_all))
-        .with_system(system!(systems::setup::router))
-        .with_system(system!(systems::setup::load))
-        .with_system(system!(systems::setup::clear_completed))
-        .build();
-
-
-    world.run_workload(systems::SETUP);
-    world.run_workload(systems::RENDER);
-
+    //first render
+    systems::update_dom(&world);
 }
 
 // enable logging and panic hook only during debug builds

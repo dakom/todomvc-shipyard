@@ -1,24 +1,27 @@
 use shipyard::*;
 use web_sys::{HtmlElement, HtmlInputElement, KeyboardEvent, MouseEvent};
 use std::rc::Rc;
-use crate::systems::{actions, RENDER};
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use crate::systems::{actions::todos, update_dom};
 const ENTER_KEY:&'static str = "Enter";
 const ESCAPE_KEY:&'static str = "Escape";
 
 
 pub fn location_change(world:Rc<World>) {
-    world.run(actions::update_filter);
-    world.run_workload(RENDER);
+    world.run(todos::update_filter);
+    update_dom(&world);
 }
 
-pub fn main_input_keydown(world:Rc<World>, elem:&HtmlInputElement, event:&KeyboardEvent) {
+pub fn main_input_keydown(world:Rc<World>, event:&KeyboardEvent) {
     if event.key() == ENTER_KEY {
+        let elem:HtmlInputElement = event.target().unwrap_throw().dyn_into().unwrap_throw();
         let value = elem.value();
         let value = value.trim();
 
         if !value.is_empty() {
-            world.run_with_data(actions::append_todo, value.to_string());
-            world.run_workload(RENDER);
+            world.run_with_data(todos::append_todo, value.to_string());
+            update_dom(&world);
         }
         elem.set_value("");
     }
@@ -35,7 +38,7 @@ pub fn todo_edit_keydown(world:Rc<World>, id:EntityId, elem:&HtmlInputElement, e
             todo_delete(world.clone(), id);
             return;
         } else {
-            world.run_with_data(actions::save_edit, id);
+            world.run_with_data(todos::save_edit, id);
         }
     } 
     if key == ESCAPE_KEY || key == ENTER_KEY {
@@ -44,29 +47,29 @@ pub fn todo_edit_keydown(world:Rc<World>, id:EntityId, elem:&HtmlInputElement, e
 }
 
 pub fn clear_completed(world:Rc<World>) {
-    world.run(actions::clear_completed);
-    world.run_workload(RENDER);
+    world.run(todos::clear_completed);
+    update_dom(&world);
 }
 pub fn todo_delete(world:Rc<World>, id:EntityId) {
-    world.run_with_data(actions::delete_todo, id);
-    world.run_workload(RENDER);
+    world.run_with_data(todos::delete_todo, id);
+    update_dom(&world);
 }
 
 pub fn todo_toggled(world:Rc<World>, _event:&MouseEvent, id:EntityId) {
-    world.run_with_data(actions::toggle_todo, id);
-    world.run_workload(RENDER);
+    world.run_with_data(todos::toggle_todo, id);
+    update_dom(&world);
 }
 
 pub fn todo_start_editing(world:Rc<World>, id:EntityId) {
-    world.run_with_data(actions::editing_todo, (id, true));
-    world.run_workload(RENDER);
+    world.run_with_data(todos::editing_todo, (id, true));
+    update_dom(&world);
 }
 
 pub fn todo_finish_editing(world:Rc<World>, id:EntityId) {
-    world.run_with_data(actions::editing_todo, (id, false));
-    world.run_workload(RENDER);
+    world.run_with_data(todos::editing_todo, (id, false));
+    update_dom(&world);
 }
 pub fn all_toggled(world:Rc<World>) {
-    world.run(actions::toggle_all);
-    world.run_workload(RENDER);
+    world.run(todos::toggle_all);
+    update_dom(&world);
 }

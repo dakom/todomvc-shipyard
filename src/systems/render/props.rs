@@ -1,28 +1,13 @@
-//The rendering systems
-//Most are executed together via a workload, even if they aren't necessary
-//This is efficient enough since the "hot path" systems are gated with dirty flags 
-//
-//Performance, if it ever becomes a problem, can be solved by
-//Either splitting the renderings up to be more targeted (not part of the workload)
-//Or maintaining more state in the world (e.g. track more dirties)
-//
-//I'd say this is actually one of the nice things of this approach
-//We get to choose where to optimize
-//Since the systems are split very granularly, it's much simpler to benchmark and fix
-//
 use shipyard::*;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use web_sys::{HtmlInputElement, HtmlElement, Element, Document};
-use gloo_events::EventListener;
-use std::rc::Rc;
+use web_sys::{HtmlInputElement, HtmlElement};
 use crate::{
     components::*,
     dom,
     dom::selector,
-    events,
-    templates::TemplateManager
 };
+
+
 pub fn main_visible(root:DomRootView, order: OrderView) {
 
     let display = if order.list.is_empty() { "none" } else { "block" };
@@ -31,22 +16,14 @@ pub fn main_visible(root:DomRootView, order: OrderView) {
     dom::set_children_with_class_style(&root.0, "footer", "display", display);
 }
 
-pub fn list(order: OrderView, doc:DocumentView) {
-
-    if let Some(change) = &order.pending_render {
-        match change {
-            ListChange::Remove(id) => {
-                let elem:Element = selector::todo(&doc, *id);
-                elem.remove();
-            },
-            ListChange::RemoveMulti(ids) => {
-                for id in ids {
-                    let elem:Element = selector::todo(&doc, *id);
-                    elem.remove();
-                }
-            }
-            _ => {}
-        }
+pub fn labels (
+    todos:View<Todo>,
+    dirty_labels:View<DirtyLabel>,
+    doc:DocumentView,
+) {
+    for (id, (todo, _)) in (&todos, &dirty_labels).iter().with_id() {
+        let elem:HtmlElement = selector::todo_label(&doc, id);
+        elem.set_inner_text(&todo.label);
     }
 }
 
@@ -87,16 +64,6 @@ pub fn editing (
     }
 }
 
-pub fn labels (
-    todos:View<Todo>,
-    dirty_labels:View<DirtyLabel>,
-    doc:DocumentView,
-) {
-    for (id, (todo, _)) in (&todos, &dirty_labels).iter().with_id() {
-        let elem:HtmlElement = selector::todo_label(&doc, id);
-        elem.set_inner_text(&todo.label);
-    }
-}
 pub fn toggle_all(todos:View<Todo>, doc:DocumentView) {
     let all_completed = todos.iter().into_iter().all(|todo| todo.completed);
     
@@ -172,21 +139,4 @@ pub fn filter_selection(bottom_filter:UniqueView<BottomFilter>, doc:DocumentView
     dom::toggle_class(&active_elem, "selected", active);
     dom::toggle_class(&completed_elem, "selected", completed);
     //  
-}
-//Not called as a system really, but rather inline
-pub fn new_todo((id, label):(EntityId, &str), doc:&Document, tm:&TemplateManager) {
-    dom::prepend_to_id(&doc, "todo-list", tm.todo_item(&label, id));
-}
-
-//Not exactly rendering, but part of the RENDER workflow
-pub fn clear_dirty(
-    mut dirty_toggles:ViewMut<DirtyToggle>,
-    mut dirty_editing:ViewMut<DirtyEditing>,
-    mut dirty_labels:ViewMut<DirtyLabel>,
-    mut order:OrderViewMut,
-) {
-    dirty_toggles.clear();
-    dirty_editing.clear();
-    dirty_labels.clear();
-    order.pending_render = None;
 }

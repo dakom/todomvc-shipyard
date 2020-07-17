@@ -1,16 +1,10 @@
-use serde::{Serialize, Deserialize};
 use wasm_bindgen::prelude::*;
-use derive_more::IntoIterator;
 use gloo_events::EventListener;
 use web_sys::HtmlInputElement;
 use std::collections::VecDeque;
-use std::rc::Rc;
 use shipyard::*;
-use crate::templates::TemplateManager;
 
-//Uniques
 pub struct MainInput {
-    pub elem: HtmlInputElement,
     pub on_keydown: EventListener
 }
 
@@ -63,53 +57,10 @@ impl BottomFilter {
     }
 }
 
-//Multi components
-#[derive(Serialize, Deserialize)]
-pub struct Todo{
-    pub label: String,
-    pub editing: bool,
-    pub completed: bool,
-}
-
-impl Todo {
-    pub fn new(label:String) -> Self {
-        Self {
-            label,
-            editing: false,
-            completed: false,
-        }
-    }
-}
-
-pub struct EventListeners(pub Vec<EventListener>);
-
-pub struct Editing{
-    pub on_blur: EventListener,
-    pub on_keydown: EventListener,
-}
-
-
-//Multi components
-
-pub struct DirtyToggle {}
-pub struct DirtyEditing{}
-pub struct DirtyLabel{}
-
-//Helpers for view access
-pub type WorldView<'a> = NonSendSync<UniqueView<'a, Rc<World>>>;
-pub type DocumentView<'a> = NonSendSync<UniqueView<'a, web_sys::Document>>;
-pub type DomRootView<'a> = NonSendSync<UniqueView<'a, DomRoot>>;
-
-pub type TemplateManagerView<'a> = NonSendSync<UniqueView<'a, TemplateManager>>;
-
-pub type OrderView<'a> = UniqueView<'a, Order>;
-pub type OrderViewMut<'a> = UniqueViewMut<'a, Order>;
-
-
-pub type LocalViewMut<'a, T> = NonSendSync<ViewMut<'a, T>>;
 
 //Dependencies
 pub enum ListChange{
+    Append(EntityId),
     Remove(EntityId),
     Swap(EntityId, EntityId),
     RemoveMulti(Vec<EntityId>),
