@@ -1,9 +1,9 @@
 use shipyard::*;
 use wasm_bindgen::prelude::*;
 use web_sys::{HtmlInputElement, HtmlElement};
+use awsm_web::dom;
 use crate::{
     components::*,
-    dom,
     dom::selector,
 };
 

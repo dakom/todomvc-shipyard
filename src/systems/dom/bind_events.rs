@@ -4,9 +4,9 @@ use wasm_bindgen::JsCast;
 use std::rc::Rc;
 use web_sys::{HtmlElement, Document, HtmlInputElement};
 use gloo_events::EventListener;
+use awsm_web::dom;
 use crate::{
     components::*,
-    dom,
     dom::selector,
 };
 use crate::events::handlers;

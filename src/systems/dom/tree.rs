@@ -1,8 +1,8 @@
 use shipyard::*;
 use web_sys::Element;
+use awsm_web::dom;
 use crate::{
     components::*,
-    dom,
     dom::selector,
 };
 

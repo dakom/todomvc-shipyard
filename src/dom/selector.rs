@@ -1,8 +1,7 @@
 use shipyard::EntityId;
 use wasm_bindgen::JsCast;
-use crate::dom::{select, get_element_by_id};
-use wasm_bindgen::prelude::*;
-use web_sys::{HtmlElement, Element, Document};
+use awsm_web::dom::{select, get_element_by_id};
+use web_sys::Document;
 
 pub fn entity_id(id:shipyard::EntityId) -> String {
     //gotta start with a letter and avoid special characters

@@ -10,21 +10,18 @@ extern crate derive_more;
 mod templates;
 mod systems;
 mod components;
-mod dom;
 mod setup;
 mod actions;
 mod events;
 mod storage;
+mod dom;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
 use std::rc::Rc;
 use shipyard::*;
-use gloo_events::EventListener;
-use web_sys::{window, Element, Document, HtmlInputElement};
+use web_sys::{window, Element};
 use crate::{
-    components::*,
     templates::TemplateManager,
     events::initial::InitialEvents,
 };

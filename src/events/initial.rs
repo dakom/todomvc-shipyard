@@ -4,8 +4,8 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlInputElement, HtmlElement, Document};
 use std::rc::Rc;
+use awsm_web::dom;
 use crate::{
-    dom,
     dom::selector,
     events::handlers,
 };
