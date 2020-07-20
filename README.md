@@ -4,6 +4,7 @@
 [![Demo](https://img.shields.io/badge/demo-launch-yellow)](https://dakom.github.io/todomvc-shipyard)
 
 
+# TodoMVC - Shipyard
 
 #### A TodoMVC written in pure Rust on top of the [Shipyard entity component system](https://github.com/leudz/shipyard).
 
