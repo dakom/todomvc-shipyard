@@ -8,9 +8,9 @@ use crate::{
 };
 
 
-pub fn main_visible(root:DomRootView, order: OrderView) {
+pub fn main_visible(root:DomRootView, order: UniqueView<Order>) {
 
-    let display = if order.list.is_empty() { "none" } else { "block" };
+    let display = if order.is_empty() { "none" } else { "block" };
 
     dom::set_children_with_class_style(&root.0, "main", "display", display);
     dom::set_children_with_class_style(&root.0, "footer", "display", display);

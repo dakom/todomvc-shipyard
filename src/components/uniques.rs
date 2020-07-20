@@ -3,11 +3,13 @@ use gloo_events::EventListener;
 use web_sys::HtmlInputElement;
 use std::collections::VecDeque;
 use shipyard::*;
+use derive_more::{Deref, DerefMut};
 
 pub struct MainInput {
     pub on_keydown: EventListener
 }
 
+#[derive(Deref, DerefMut)]
 pub struct DomRoot(pub web_sys::Element);
 
 pub struct ToggleAll {
@@ -21,10 +23,11 @@ pub struct Router {
     pub on_location: EventListener,
 }
 
-pub struct Order {
-    pub list: VecDeque<EntityId>,
-    pub pending_render: Option<ListChange>,
-}
+#[derive(Deref, DerefMut)]
+pub struct Order(pub VecDeque<EntityId>);
+
+#[derive(Deref, DerefMut)]
+pub struct TodoListChange(pub Option<ListChange>);
 
 pub struct BottomFilter {
     pub completed: Option<bool>,

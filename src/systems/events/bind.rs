@@ -15,11 +15,11 @@ pub fn list(
     mut entities:EntitiesViewMut, 
     mut event_listeners:LocalViewMut<EventListeners>,
     world: WorldView,
-    order: OrderView, 
+    list_change: UniqueView<TodoListChange>, 
     doc:DocumentView, 
     todos:View<Todo>, 
 ) { 
-    if let Some(change) = &order.pending_render {
+    if let Some(change) = list_change.as_ref() {
         match change {
             //No need to handle Remove since the entire entity is deleted
             //which will also drop the EventListeners

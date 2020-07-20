@@ -12,7 +12,8 @@ pub fn update_filter(mut filter:UniqueViewMut<BottomFilter>) {
 pub fn append_todo(
     label:String, 
     mut entities:EntitiesViewMut, 
-    mut order:OrderViewMut,
+    mut list_change: UniqueViewMut<TodoListChange>, 
+    mut order:UniqueViewMut<Order>,
     mut todos:ViewMut<Todo>,
     mut event_listeners:LocalViewMut<EventListeners>,
     world: WorldView,
@@ -24,9 +25,9 @@ pub fn append_todo(
 
 
     //push the entitity onto the order
-    order.list.push_front(id);
+    order.push_front(id);
 
-    order.pending_render = Some(ListChange::Append(id));
+    list_change.0 = Some(ListChange::Append(id));
 
     entities.add_component(&mut todos, Todo::new(label), id);
 }
@@ -64,9 +65,10 @@ pub fn clear_completed(
     }
 
     {
-        let mut order:OrderViewMut = storages.borrow();
-        order.list.retain(|order_id| !to_delete.contains(&order_id));
-        order.pending_render = Some(ListChange::RemoveMulti(to_delete));
+        let mut order:UniqueViewMut<Order> = storages.borrow();
+        let mut list_change: UniqueViewMut<TodoListChange> = storages.borrow();
+        order.retain(|order_id| !to_delete.contains(&order_id));
+        list_change.0 = Some(ListChange::RemoveMulti(to_delete));
     }
 }
 
@@ -75,9 +77,10 @@ pub fn delete_todo(
     mut storages:AllStoragesViewMut,
 ) {
     {
-        let mut order:OrderViewMut = storages.borrow();
-        order.list.retain(|order_id| *order_id != id);
-        order.pending_render = Some(ListChange::Remove(id));
+        let mut order:UniqueViewMut<Order> = storages.borrow();
+        let mut list_change: UniqueViewMut<TodoListChange> = storages.borrow();
+        order.retain(|order_id| *order_id != id);
+        list_change.0 = Some(ListChange::Remove(id));
     }
 
     storages.delete(id);

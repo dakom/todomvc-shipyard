@@ -5,6 +5,8 @@
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+extern crate derive_more;
+
 mod templates;
 mod systems;
 mod components;

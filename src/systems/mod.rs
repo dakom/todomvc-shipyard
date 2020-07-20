@@ -33,6 +33,7 @@ pub fn register_workloads(world:&World) {
     world
         .add_workload(actions::CLEANUP)
         .with_system(system!(actions::cleanup::clear_dirty))
+        .with_system(system!(actions::cleanup::clear_list_change))
         .build();
 
 }

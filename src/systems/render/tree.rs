@@ -6,9 +6,14 @@ use crate::{
     dom::selector,
 };
 
-pub fn list(order: OrderView, doc:DocumentView, todos:View<Todo>, tm:TemplateManagerView) {
+pub fn list(
+    list_change: UniqueView<TodoListChange>, 
+    doc:DocumentView, 
+    todos:View<Todo>, 
+    tm:TemplateManagerView
+) {
 
-    if let Some(change) = &order.pending_render {
+    if let Some(change) = list_change.as_ref() {
         match change {
             ListChange::Remove(id) => {
                 let elem:Element = selector::todo(&doc, *id);

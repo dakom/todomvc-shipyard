@@ -1,5 +1,6 @@
 use serde::{Serialize, Deserialize};
 use gloo_events::EventListener;
+use derive_more::{Deref, DerefMut};
 
 #[derive(Serialize, Deserialize)]
 pub struct Todo{
@@ -18,6 +19,7 @@ impl Todo {
     }
 }
 
+#[derive(Deref, DerefMut)]
 pub struct EventListeners(pub Vec<EventListener>);
 
 pub struct Editing{

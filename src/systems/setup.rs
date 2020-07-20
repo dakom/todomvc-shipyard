@@ -25,7 +25,8 @@ pub fn global_uniques(
 
     storages.add_unique_non_send_sync(world);
     storages.add_unique_non_send_sync(tm);
-    storages.add_unique(Order{ list: VecDeque::new(), pending_render: None});
+    storages.add_unique(Order(VecDeque::new()));
+    storages.add_unique(TodoListChange(None));
     storages.add_unique(BottomFilter::new());
     storages.add_unique_non_send_sync(document);
     storages.add_unique_non_send_sync(DomRoot(body));
@@ -48,7 +49,7 @@ pub fn global_uniques(
 pub fn load(
     world:WorldView,
     mut entities:EntitiesViewMut, 
-    mut order:OrderViewMut,
+    mut order:UniqueViewMut<Order>,
     mut todos:ViewMut<Todo>,
     mut event_listeners:LocalViewMut<EventListeners>,
     tm:TemplateManagerView,
