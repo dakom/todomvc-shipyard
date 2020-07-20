@@ -38,3 +38,21 @@ Most of the techniques used here are shipyard-specific, for example it makes hea
 Another angle is thinking in a "ECS" or, more generally, "data-oriented" way. Not so much in terms of keeping the cache happy (though that too), but more like splitting things up and iterating over the storages across different systems. This takes some getting used to, but it's a fun and effective way to program.
 
 There's actually a _ton_ of freedom in this approach overall to build things in different ways. Please consider this demo _a_ way to build on the DOM with an ECS, not _the_ way, even if we're talking shipyard-specific. For example, this demo doesn't even use [Update Packs](https://leudz.github.io/shipyard/guide/going-further/packs.html#update) at all, which would have been a way to make it more "reactive" out of the box.
+
+### Flow
+
+I've split things up into different modules and files to make it easier to reason about in the editor, but really when it comes down to it the flow is pretty simple and this could have been done with far fewer files. It's like this:
+
+1. Initial setup (first render, first event bindings, load from local storage, etc.)
+2. Core loop: Event handlers change the World with the ad-hoc data, and then call systems/workloads to update the world futher.
+
+That's pretty much it, honestly. The specific systems and workloads are orgnized to do things in a specific order:
+
+1. Process core data
+2. Render the dom tree
+3. Render the dom props/styles
+4. Bind event listeners
+5. Cleanup
+6. Save to LocalStorage
+
+Since it's all a loop I'd suggest starting the exploration from the [workloads](src/systems/workloads.rs) and then go from there :)
