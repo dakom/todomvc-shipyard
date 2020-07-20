@@ -8,7 +8,7 @@ const CLEANUP:&'static str = "cleanup";
 
 pub fn register(world:&World) {
     world
-        .add_workload(INHERENT)
+        .add_workload(CORE)
         .with_system(system!(super::todos::list))
         .with_system(system!(super::maintenance::delete_pending))
         .build();
