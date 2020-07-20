@@ -27,7 +27,7 @@ pub struct Router {
 pub struct Order(pub VecDeque<EntityId>);
 
 #[derive(Deref, DerefMut)]
-pub struct TodoListChange(pub Option<ListChange>);
+pub struct ListChanges(pub Vec<ListChange>);
 
 pub struct BottomFilter {
     pub completed: Option<bool>,
@@ -65,6 +65,4 @@ impl BottomFilter {
 pub enum ListChange{
     Append(EntityId),
     Remove(EntityId),
-    Swap(EntityId, EntityId),
-    RemoveMulti(Vec<EntityId>),
 }

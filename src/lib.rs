@@ -11,6 +11,9 @@ mod templates;
 mod systems;
 mod components;
 mod dom;
+mod setup;
+mod actions;
+mod events;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
@@ -39,16 +42,16 @@ pub async fn main_js() {
 
     //init world
     let world = Rc::new(World::default());
-    world.run_with_data(systems::setup::global_uniques, (
+    world.run_with_data(setup::global_uniques, (
             template_manager, 
             document, 
             body, 
             world.clone()
     ));
-    systems::register_workloads(&world);
+    systems::workloads::register(&world);
 
     //first render
-    systems::update_dom(&world);
+    systems::workloads::run_update(&world);
 }
 
 // enable logging and panic hook only during debug builds

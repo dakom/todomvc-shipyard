@@ -9,17 +9,17 @@ use crate::{
     dom,
     dom::selector,
 };
-use super::handlers;
+use crate::events::handlers;
 
 pub fn list(
     mut entities:EntitiesViewMut, 
     mut event_listeners:LocalViewMut<EventListeners>,
     world: WorldView,
-    list_change: UniqueView<TodoListChange>, 
+    list_changes: UniqueView<ListChanges>, 
     doc:DocumentView, 
     todos:View<Todo>, 
-) { 
-    if let Some(change) = list_change.as_ref() {
+) {
+    for change in list_changes.iter() {
         match change {
             //No need to handle Remove since the entire entity is deleted
             //which will also drop the EventListeners

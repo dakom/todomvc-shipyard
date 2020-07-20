@@ -13,8 +13,8 @@ pub fn clear_dirty(
 }
 
 
-pub fn clear_list_change(
-    mut list_change:UniqueViewMut<TodoListChange>,
+pub fn clear_list_changes(
+    mut list_changes:UniqueViewMut<ListChanges>,
 ) {
-    list_change.0 = None;
+    list_changes.clear();
 }

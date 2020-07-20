@@ -2,7 +2,7 @@ use serde::{Serialize, Deserialize};
 use gloo_events::EventListener;
 use derive_more::{Deref, DerefMut};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Todo{
     pub label: String,
     pub editing: bool,

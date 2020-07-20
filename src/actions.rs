@@ -12,24 +12,14 @@ pub fn update_filter(mut filter:UniqueViewMut<BottomFilter>) {
 pub fn append_todo(
     label:String, 
     mut entities:EntitiesViewMut, 
-    mut list_change: UniqueViewMut<TodoListChange>, 
-    mut order:UniqueViewMut<Order>,
     mut todos:ViewMut<Todo>,
-    mut event_listeners:LocalViewMut<EventListeners>,
-    world: WorldView,
-    tm:TemplateManagerView,
-    doc:DocumentView,
+    mut list_changes: UniqueViewMut<ListChanges>, 
 ) {
     //create the entity
-    let id = entities.add_entity((), ());
+    let id = entities.add_entity(&mut todos, Todo::new(label));
 
+    list_changes.push(ListChange::Append(id));
 
-    //push the entitity onto the order
-    order.push_front(id);
-
-    list_change.0 = Some(ListChange::Append(id));
-
-    entities.add_component(&mut todos, Todo::new(label), id);
 }
 
 pub fn toggle_todo(
@@ -45,45 +35,21 @@ pub fn toggle_todo(
 }
 
 pub fn clear_completed(
-    mut storages:AllStoragesViewMut,
+    mut list_changes:UniqueViewMut<ListChanges>,
+    todos: View<Todo>,
 ) {
-
-    let to_delete = {
-        let todos:View<Todo> = storages.borrow();
-        todos.iter().with_id().fold(Vec::new(), |mut acc, (id, todo)| {
-            if todo.completed {
-                acc.push(id);
-            }
-            acc
-        })
-    };
-
-    {
-        for id in to_delete.iter() {
-            storages.delete(*id);
+    todos.iter().with_id().for_each(|(id, todo)| {
+        if todo.completed {
+            list_changes.push(ListChange::Remove(id));
         }
-    }
-
-    {
-        let mut order:UniqueViewMut<Order> = storages.borrow();
-        let mut list_change: UniqueViewMut<TodoListChange> = storages.borrow();
-        order.retain(|order_id| !to_delete.contains(&order_id));
-        list_change.0 = Some(ListChange::RemoveMulti(to_delete));
-    }
+    });
 }
 
 pub fn delete_todo(
-    id:EntityId, 
-    mut storages:AllStoragesViewMut,
+    id: EntityId,
+    mut list_changes:UniqueViewMut<ListChanges>,
 ) {
-    {
-        let mut order:UniqueViewMut<Order> = storages.borrow();
-        let mut list_change: UniqueViewMut<TodoListChange> = storages.borrow();
-        order.retain(|order_id| *order_id != id);
-        list_change.0 = Some(ListChange::Remove(id));
-    }
-
-    storages.delete(id);
+    list_changes.push(ListChange::Remove(id));
 }
 
 pub fn save_edit(
