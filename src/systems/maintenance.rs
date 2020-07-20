@@ -6,3 +6,4 @@ pub fn delete_pending(
 ) {
     all_storages.delete_any::<(DeleteMe,)>();
 }
+

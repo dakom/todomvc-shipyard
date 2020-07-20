@@ -21,6 +21,7 @@ web-sys = { version = "0.3.39", features = [
     'DocumentFragment', 
     'HtmlTemplateElement',
     'Window',
+    'Storage',
     'Location',
     'Element',
     'CssStyleDeclaration',

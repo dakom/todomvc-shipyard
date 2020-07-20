@@ -10,23 +10,26 @@ pub fn update_filter(mut filter:UniqueViewMut<BottomFilter>) {
 }
 
 pub fn append_todo(
-    label:String, 
+    (label, completed):(String, bool), 
     mut entities:EntitiesViewMut, 
     mut todos:ViewMut<Todo>,
     mut list_changes: UniqueViewMut<ListChanges>, 
+    mut dirty_toggles:ViewMut<DirtyToggle>,
 ) {
-    //create the entity
-    let id = entities.add_entity(&mut todos, Todo::new(label));
 
+    let id = entities.add_entity(&mut todos, Todo::new(label, completed));
     list_changes.push(ListChange::Append(id));
 
+    if completed {
+        entities.add_component(&mut dirty_toggles, DirtyToggle{}, id);
+    }
 }
 
 pub fn toggle_todo(
     id:EntityId, 
     mut todos:ViewMut<Todo>, 
     mut dirty_toggles:ViewMut<DirtyToggle>,
-    mut entities:EntitiesViewMut, 
+    entities:EntitiesViewMut, 
 ) {
     if let Ok(todo) = (&mut todos).get(id) {
         todo.completed = !todo.completed;
@@ -56,7 +59,7 @@ pub fn save_edit(
     id: EntityId,
     mut todos:ViewMut<Todo>, 
     mut dirty_labels:ViewMut<DirtyLabel>,
-    mut entities:EntitiesViewMut, 
+    entities:EntitiesViewMut, 
     doc:DocumentView,
 ) {
     if let Ok(todo) = (&mut todos).get(id) {
@@ -69,11 +72,8 @@ pub fn save_edit(
 pub fn editing_todo(
     (id, editing):(EntityId, bool), 
     mut todos:ViewMut<Todo>, 
-    mut todo_editing:LocalViewMut<Editing>, 
     mut dirty_editing:ViewMut<DirtyEditing>,
-    mut entities:EntitiesViewMut, 
-    doc:DocumentView,
-    world:WorldView,
+    entities:EntitiesViewMut, 
 ) {
     if let Ok(todo) = (&mut todos).get(id) {
         if todo.editing != editing {
@@ -84,7 +84,7 @@ pub fn editing_todo(
 }
 
 pub fn toggle_all(
-    mut entities:EntitiesViewMut, 
+    entities:EntitiesViewMut, 
     mut todos:ViewMut<Todo>,
     mut dirty_toggles:ViewMut<DirtyToggle>,
 ) {

@@ -5,8 +5,10 @@ const DOM_TREE:&'static str = "dom-tree";
 const DOM_PROPS:&'static str = "dom-props";
 const DOM_EVENTS:&'static str = "dom-events";
 const CLEANUP:&'static str = "cleanup";
+const SAVE:&'static str = "save";
 
 pub fn register(world:&World) {
+
     world
         .add_workload(CORE)
         .with_system(system!(super::todos::list))
@@ -20,8 +22,8 @@ pub fn register(world:&World) {
 
     world
         .add_workload(DOM_EVENTS)
-        .with_system(system!(super::dom::events::list))
-        .with_system(system!(super::dom::events::editing_todo))
+        .with_system(system!(super::dom::bind_events::list))
+        .with_system(system!(super::dom::bind_events::editing_todo))
         .build();
 
     world
@@ -44,6 +46,10 @@ pub fn register(world:&World) {
         .with_system(system!(super::cleanup::clear_list_changes))
         .build();
 
+    world
+        .add_workload(SAVE)
+        .with_system(system!(super::save::save_todos))
+        .build();
 }
 
 pub fn run_update(world:&World) {
@@ -52,6 +58,12 @@ pub fn run_update(world:&World) {
     world.run_workload(DOM_PROPS);
     world.run_workload(DOM_EVENTS);
     world.run_workload(CLEANUP);
-
+   
+    //not necessary to do every update, but this is easy :P
+    save(world);
     //world.run(super::debug::log_todos);
+}
+
+pub fn save(world:&World) {
+    world.run_workload(SAVE);
 }

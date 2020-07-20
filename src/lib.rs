@@ -14,6 +14,7 @@ mod dom;
 mod setup;
 mod actions;
 mod events;
+mod storage;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
@@ -25,6 +26,7 @@ use web_sys::{window, Element, Document, HtmlInputElement};
 use crate::{
     components::*,
     templates::TemplateManager,
+    events::initial::InitialEvents,
 };
 
 #[wasm_bindgen(start)]
@@ -42,15 +44,18 @@ pub async fn main_js() {
 
     //init world
     let world = Rc::new(World::default());
+    let initial_events = InitialEvents::bind(&document, world.clone());
     world.run_with_data(setup::global_uniques, (
             template_manager, 
             document, 
             body, 
+            initial_events,
             world.clone()
     ));
     systems::workloads::register(&world);
 
-    //first render
+    setup::load(&world);
+
     systems::workloads::run_update(&world);
 }
 

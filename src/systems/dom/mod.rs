@@ -1,4 +1,4 @@
 pub mod tree;
 pub mod props;
-pub mod events;
+pub mod bind_events;
 

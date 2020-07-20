@@ -21,7 +21,7 @@ pub fn main_input_keydown(world:Rc<World>, event:&KeyboardEvent) {
         let value = value.trim();
 
         if !value.is_empty() {
-            world.run_with_data(actions::append_todo, value.to_string());
+            world.run_with_data(actions::append_todo, (value.to_string(), false));
             run_update(&world);
         }
         elem.set_value("");

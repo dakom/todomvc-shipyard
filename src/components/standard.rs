@@ -10,11 +10,11 @@ pub struct Todo{
 }
 
 impl Todo {
-    pub fn new(label:String) -> Self {
+    pub fn new(label:String, completed: bool) -> Self {
         Self {
             label,
             editing: false,
-            completed: false,
+            completed,
         }
     }
 }
