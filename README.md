@@ -41,12 +41,12 @@ There's actually a _ton_ of freedom in this approach overall to build things in 
 
 ### Flow
 
-I've split things up into different modules and files to make it easier to reason about in the editor, but really when it comes down to it the flow is pretty simple and this could have been done with far fewer files. It's like this:
+The code is split up into different modules and files to make it easier to reason about in the editor, but really when it comes down to it the flow is pretty simple and this could have been done with far fewer files. It's like this:
 
 1. Initial setup (first render, first event bindings, load from local storage, etc.)
-2. Core loop: Event handlers change the World with the ad-hoc data, and then call systems/workloads to update the world futher.
+2. Event handlers change the World with the ad-hoc data, and then call systems/workloads to update the world futher (this then becomes a loop as more events are fired).
 
-That's pretty much it, honestly. The specific systems and workloads are orgnized to do things in a specific order:
+That's pretty much it, honestly. The various workloads are orgnized to do things in a specific order:
 
 1. Process core data
 2. Render the dom tree
@@ -55,4 +55,6 @@ That's pretty much it, honestly. The specific systems and workloads are orgnized
 5. Cleanup
 6. Save to LocalStorage
 
-Since it's all a loop I'd suggest starting the exploration from the [workloads](src/systems/workloads.rs) and then go from there :)
+The systems within these workloads is where the magic happens, and each one does a very specific job. 
+
+I'd suggest starting the exploration from the [workloads](src/systems/workloads.rs) and then go from there :)
